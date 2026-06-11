@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "glypheris1",
+  "productName": "glypheris",
   "version": "0.1.0",
-  "identifier": "com.dev-portal.glypheris1",
+  "identifier": "com.glypheris.compiler",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -12,9 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "glypheris1",
-        "width": 800,
-        "height": 600
+        "title": "Glypheris Compiler",
+        "width": 1280,
+        "height": 800,
+        "fullscreen": false,
+        "resizable": true
       }
     ],
     "security": {
@@ -30,6 +32,15 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "resources": ["grammars/*", "binaries/models/*"]
+  },
+  "plugins": {
+    "shell": {
+      "scope": [
+        { "name": "binaries/llama-cpu", "sidecar": true },
+        { "name": "binaries/llama-vulkan", "sidecar": true }
+      ]
+    }
   }
 }
