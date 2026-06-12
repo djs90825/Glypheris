@@ -3,6 +3,8 @@ root ::= "{" ws "\"action\":" ws action-type "," ws "\"intensity\":" ws float ",
 action-type ::= "\"IDLE\"" | "\"JUMP\"" | "\"WAVE\"" | "\"RUN\"" | "\"ATTACK\""
 vector3 ::= "{" ws "\"x\":" ws float "," ws "\"y\":" ws float "," ws "\"z\":" ws float ws "}"
 
-float ::= "-"? [0-9]+ "." [0-9]+
-int ::= "-"? [0-9]+
+# Expanded bounds: Allows up to 4 digits before the decimal (e.g., 1500.5) to support vectors.
+float ::= "-"? [0-9] [0-9]? [0-9]? [0-9]? "." [0-9] [0-9]? [0-9]?
+int ::= "-"? [0-9] [0-9]? [0-9]? [0-9]? [0-9]?
+
 ws ::= [ \t\n]*
