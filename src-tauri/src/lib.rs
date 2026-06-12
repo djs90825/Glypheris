@@ -1,7 +1,6 @@
-use serde::{Deserialize, Serialize};
-use std::os::windows::process::CommandExt; // Required for the creation_flags in engine.rs
+use serde::Serialize; // Removed the unused Deserialize
 
-mod engine;
+pub mod compiler; // Properly binds the compiler directory
 
 #[derive(Serialize)]
 pub struct CompileResponse {
@@ -35,14 +34,14 @@ async fn compile(intent: String, schema: String) -> Result<CompileResponse, Stri
         });
     }
 
-    // Resolve structural constraints based on the UI dropdown
+    // Resolve structural constraints
     let grammar_path = match schema.as_str() {
         "GestureCommand" => "grammars/gesture_command.gbnf",
         _ => "grammars/gesture_command.gbnf",
     };
 
-    // Ignite the physical local inference engine
-    match engine::execute_compilation(&intent, grammar_path) {
+    // Ignite the physical local inference engine via the correct module path
+    match compiler::engine::execute_compilation(&intent, grammar_path) {
         Ok(result) => {
             // Convert the strictly validated JSON string into a raw HEX payload view
             let hex_string: String = result
