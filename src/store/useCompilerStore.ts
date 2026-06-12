@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { invoke } from '@tauri-apps/api/core';
+import { estimateTokens } from '../utils/tokenizer';
 
 interface TelemetryMetrics {
     tps: number;
@@ -40,6 +41,15 @@ export const useCompilerStore = create<CompilerState>((set, get) => ({
     setActiveProfile: (profile) => set({ activeProfile: profile }),
     
     triggerCompilation: async () => {
+        const intent = get().intentInput;
+        
+        // Context Guard: Reject if prompt exceeds allocated tokens (assume max 512 for intent context)
+        const totalTokens = estimateTokens(intent);
+        if (totalTokens > 500) {
+            set({ engineFault: `Input too long (${totalTokens} tokens). Please shorten.` });
+            return;
+        }
+
         set({ isCompiling: true, isAmbiguousHalt: false, engineFault: null }); // Clear previous faults
         const start = performance.now();
         
