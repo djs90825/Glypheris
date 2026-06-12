@@ -1,6 +1,6 @@
-root ::= "{" ws "\"action\":" ws action_type "," ws "\"intensity\":" ws float "," ws "\"duration_ms\":" ws int "," ws "\"direction\":" ws vector3 "," ws "\"compiler_verified\": true" ws "}"
+root ::= "{" ws "\"action\":" ws action-type "," ws "\"intensity\":" ws float "," ws "\"duration_ms\":" ws int "," ws "\"direction\":" ws vector3 "," ws "\"compiler_verified\": true" ws "}"
 
-action_type ::= "\"IDLE\"" | "\"JUMP\"" | "\"WAVE\"" | "\"RUN\"" | "\"ATTACK\""
+action-type ::= "\"IDLE\"" | "\"JUMP\"" | "\"WAVE\"" | "\"RUN\"" | "\"ATTACK\""
 vector3 ::= "{" ws "\"x\":" ws float "," ws "\"y\":" ws float "," ws "\"z\":" ws float ws "}"
 
 float ::= "-"? [0-9]+ "." [0-9]+
