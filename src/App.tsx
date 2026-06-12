@@ -59,6 +59,14 @@ function App() {
 
         {/* Right Panel: Compilation Output */}
         <section className="w-1/2 flex flex-col gap-4">
+          
+          {/* Hardware Fault Banner */}
+          {useCompilerStore.getState().engineFault && (
+            <div className="bg-red-950 border border-red-500 rounded-lg p-3 text-xs font-bold text-red-400 uppercase tracking-wide">
+              Critical Hardware Fault: {useCompilerStore.getState().engineFault}
+            </div>
+          )}
+
           {isAmbiguousHalt ? (
             <div className="bg-slate-900 border border-red-500/50 rounded-lg p-4 flex flex-col justify-center items-center h-full text-center relative overflow-hidden">
               <div className="absolute inset-0 bg-red-500/5 animate-pulse"></div>
