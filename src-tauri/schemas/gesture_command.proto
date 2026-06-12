@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package glypheris.animation;
+
+// The strict machine representation of a physical 3D action.
+message GestureCommand {
+    enum ActionType {
+        IDLE = 0;
+        JUMP = 1;
+        WAVE = 2;
+        RUN = 3;
+        ATTACK = 4;
+    }
+
+    ActionType action = 1;
+    
+    // Parameterized modifiers (0.0 to 1.0 intensity)
+    float intensity = 2;
+    
+    // Duration in milliseconds
+    int32 duration_ms = 3;
+    
+    // Target vector for directional actions (e.g., jump direction)
+    message Vector3 {
+        float x = 1;
+        float y = 2;
+        float z = 3;
+    }
+    Vector3 direction = 4;
+    
+    // Absolute guarantee this packet was machine-validated
+    bool compiler_verified = 5;
+}
