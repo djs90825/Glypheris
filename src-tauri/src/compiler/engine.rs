@@ -42,6 +42,7 @@ pub fn execute_compilation(intent: &str, grammar_path: &str) -> Result<EngineRes
             grammar_full_path.to_str().unwrap(),
             "--temp",
             "0.0",
+            "--no-conversation",
             "-p",
             &strict_prompt,
         ])
