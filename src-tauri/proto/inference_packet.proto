@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package glypheris.inference;
+
+message InferencePacket {
+    message ThoughtNode {
+        string node_id = 1;
+        string reasoning = 2;
+        float confidence = 3;
+    }
+
+    repeated ThoughtNode chain_of_thought = 1;
+    string final_conclusion = 2;
+    float overall_confidence = 3;
+    bool compiler_verified = 4;
+}

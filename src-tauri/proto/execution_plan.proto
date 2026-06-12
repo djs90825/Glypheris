@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package glypheris.agents;
+
+message ExecutionPlan {
+    message TaskNode {
+        string task_id = 1;
+        string tool_name = 2;
+        string parameters_json = 3;
+        repeated string dependencies = 4;
+    }
+
+    repeated TaskNode nodes = 1;
+    bool requires_approval = 2;
+    string objective_summary = 3;
+    bool compiler_verified = 4;
+}
