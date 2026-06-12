@@ -16,6 +16,7 @@ interface CompilerState {
     isAmbiguousHalt: boolean;
     entropyScore: number;
     metrics: TelemetryMetrics | null;
+    engineFault: string | null; // NEW FIELD
     
     setIntentInput: (input: string) => void;
     setActiveProfile: (profile: CompilerState['activeProfile']) => void;
@@ -33,12 +34,13 @@ export const useCompilerStore = create<CompilerState>((set, get) => ({
     isAmbiguousHalt: false,
     entropyScore: 0,
     metrics: null,
+    engineFault: null, // NEW DEFAULT
 
     setIntentInput: (input) => set({ intentInput: input }),
     setActiveProfile: (profile) => set({ activeProfile: profile }),
     
     triggerCompilation: async () => {
-        set({ isCompiling: true, isAmbiguousHalt: false });
+        set({ isCompiling: true, isAmbiguousHalt: false, engineFault: null }); // Clear previous faults
         const start = performance.now();
         
         try {
@@ -76,7 +78,8 @@ export const useCompilerStore = create<CompilerState>((set, get) => ({
             
         } catch (error) {
             console.error("Compilation engine failure:", error);
-            set({ isCompiling: false });
+            // SURFACE THE HARDWARE FAULT TO THE UI
+            set({ isCompiling: false, engineFault: String(error) }); 
         }
     },
     
@@ -93,7 +96,8 @@ export const useCompilerStore = create<CompilerState>((set, get) => ({
             isCompiling: false,
             isAmbiguousHalt: false,
             entropyScore: 0,
-            metrics: null
+            metrics: null,
+            engineFault: null // Clear fault on reset
         });
     }
 }));
