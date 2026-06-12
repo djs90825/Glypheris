@@ -34,13 +34,5 @@
       "icons/icon.ico"
     ],
     "resources": ["grammars/*", "binaries/models/*"]
-  },
-  "plugins": {
-    "shell": {
-      "scope": [
-        { "name": "binaries/llama-cpu", "sidecar": true },
-        { "name": "binaries/llama-vulkan", "sidecar": true }
-      ]
-    }
   }
 }
