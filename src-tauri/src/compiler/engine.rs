@@ -42,10 +42,11 @@ pub fn execute_compilation(intent: &str, grammar_path: &str) -> Result<EngineRes
             grammar_full_path.to_str().unwrap(),
             "--temp",
             "0.0",
-            "--no-conversation",
+            "-st",
             "-p",
             &strict_prompt,
         ])
+        .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .creation_flags(0x08000000) // CREATE_NO_WINDOW
