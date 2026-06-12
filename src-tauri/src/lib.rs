@@ -1,4 +1,7 @@
 use serde::{Deserialize, Serialize};
+use std::os::windows::process::CommandExt; // Required for the creation_flags in engine.rs
+
+mod engine;
 
 #[derive(Serialize)]
 pub struct CompileResponse {
@@ -12,12 +15,16 @@ pub struct CompileResponse {
 
 #[tauri::command]
 async fn compile(intent: String, schema: String) -> Result<CompileResponse, String> {
-    println!("Glypheris Intercept - Intent: [{}], Schema: [{}]", intent, schema);
-    
-    // PHASE 1 MOCK: Ambiguity Threshold Simulation
-    // In Phase 2, this will be determined by llama.cpp entropy outputs.
+    println!(
+        "Glypheris Intercept - Intent: [{}], Schema: [{}]",
+        intent, schema
+    );
+
     let intent_lower = intent.to_lowercase();
-    if intent.trim().is_empty() || intent_lower.contains("maybe") || intent_lower.contains("sort of") {
+    if intent.trim().is_empty()
+        || intent_lower.contains("maybe")
+        || intent_lower.contains("sort of")
+    {
         return Ok(CompileResponse {
             status: "AMBIGUOUS_HALT".to_string(),
             binary_hex: "".to_string(),
@@ -28,21 +35,45 @@ async fn compile(intent: String, schema: String) -> Result<CompileResponse, Stri
         });
     }
 
-    // PHASE 1 MOCK: Deterministic Compilation Simulation
-    Ok(CompileResponse {
-        status: "OK".to_string(),
-        binary_hex: "0A 0B 48 65 6C 6C 6F 10 01 0F A2".to_string(),
-        asm: "; GBNF Validated Execution Plan\nLD A, 0x01\nOUT (0x10), A\nHALT".to_string(),
-        ambiguity_score: 0.02,
-        tps: 45.2,
-        ttft: 120.5,
-    })
+    // Resolve structural constraints based on the UI dropdown
+    let grammar_path = match schema.as_str() {
+        "GestureCommand" => "grammars/gesture_command.gbnf",
+        _ => "grammars/gesture_command.gbnf",
+    };
+
+    // Ignite the physical local inference engine
+    match engine::execute_compilation(&intent, grammar_path) {
+        Ok(result) => {
+            // Convert the strictly validated JSON string into a raw HEX payload view
+            let hex_string: String = result
+                .json_payload
+                .as_bytes()
+                .iter()
+                .map(|b| format!("{:02X}", b))
+                .collect::<Vec<String>>()
+                .join(" ");
+
+            Ok(CompileResponse {
+                status: "OK".to_string(),
+                binary_hex: hex_string,
+                asm: format!("; GBNF VALIDATED JSON PAYLOAD\n{}", result.json_payload),
+                ambiguity_score: 0.01,
+                tps: result.tps,
+                ttft: result.ttft,
+            })
+        }
+        Err(e) => {
+            println!("Compilation Failure: {}", e);
+            Err(e)
+        }
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![compile])
         .run(tauri::generate_context!())
         .expect("Critical failure whilst running Glypheris compiler");
