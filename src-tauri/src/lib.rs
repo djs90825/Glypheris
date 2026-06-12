@@ -1,6 +1,7 @@
 use serde::Serialize; // Removed the unused Deserialize
 
-pub mod compiler; // Properly binds the compiler directory
+pub mod compiler;
+pub mod gen;
 
 #[derive(Serialize)]
 pub struct CompileResponse {
@@ -37,16 +38,18 @@ async fn compile(intent: String, schema: String) -> Result<CompileResponse, Stri
     // Resolve structural constraints
     let grammar_path = match schema.as_str() {
         "GestureCommand" => "grammars/gesture_command.gbnf",
+        "ExecutionPlan" => "grammars/execution_plan.gbnf",
+        "InferencePacket" => "grammars/inference_packet.gbnf",
         _ => "grammars/gesture_command.gbnf",
     };
 
     // Ignite the physical local inference engine via the correct module path
     match compiler::engine::execute_compilation(&intent, grammar_path) {
         Ok(result) => {
-            // Convert the strictly validated JSON string into a raw HEX payload view
-            let hex_string: String = result
-                .json_payload
-                .as_bytes()
+            // Compile JSON to binary Protobuf
+            let binary = compiler::serializer::compile_to_binary(&result.json_payload, &schema)?;
+            
+            let hex_string: String = binary
                 .iter()
                 .map(|b| format!("{:02X}", b))
                 .collect::<Vec<String>>()
