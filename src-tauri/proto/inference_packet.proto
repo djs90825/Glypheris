@@ -3,14 +3,28 @@ syntax = "proto3";
 package glypheris.inference;
 
 message InferencePacket {
-    message ThoughtNode {
-        string node_id = 1;
-        string reasoning = 2;
-        float confidence = 3;
+    enum QueryType {
+        CONVERSATIONAL = 0;
+        FACTUAL = 1;
+        ANALYTICAL = 2;
+        CREATIVE = 3;
+        INSTRUCTIONAL = 4;
     }
 
-    repeated ThoughtNode chain_of_thought = 1;
-    string final_conclusion = 2;
-    float overall_confidence = 3;
-    bool compiler_verified = 4;
+    message ThoughtNode {
+        string step_id = 1;
+        string reasoning = 2;
+        float confidence = 3;
+        repeated string evidence_refs = 4;
+    }
+
+    string session_id = 1;
+    QueryType query_type = 2;
+    float confidence_threshold = 3;
+    repeated ThoughtNode chain_of_thought = 4;
+    string final_answer = 5;
+    float overall_confidence = 6;
+    bool requires_clarification = 7;
+    int32 context_window_used = 8;
+    bool compiler_verified = 9;
 }

@@ -3,6 +3,14 @@ syntax = "proto3";
 package glypheris.agents;
 
 message ExecutionPlan {
+    enum PriorityLevel {
+        BACKGROUND = 0;
+        LOW = 1;
+        NORMAL = 2;
+        HIGH = 3;
+        CRITICAL = 4;
+    }
+
     message TaskNode {
         string task_id = 1;
         string tool_name = 2;
@@ -10,8 +18,14 @@ message ExecutionPlan {
         repeated string dependencies = 4;
     }
 
-    repeated TaskNode nodes = 1;
-    bool requires_approval = 2;
-    string objective_summary = 3;
-    bool compiler_verified = 4;
+    string plan_id = 1;
+    string objective = 2;
+    PriorityLevel priority_level = 3;
+    int32 max_retries = 4;
+    int32 timeout_ms = 5;
+    bool requires_confirmation = 6;
+    bool parallel_allowed = 7;
+    repeated TaskNode nodes = 8;
+    float estimated_cost_units = 9;
+    bool compiler_verified = 10;
 }

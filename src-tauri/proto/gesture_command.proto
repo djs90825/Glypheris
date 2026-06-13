@@ -10,6 +10,42 @@ message GestureCommand {
         WAVE = 2;
         RUN = 3;
         ATTACK = 4;
+        WALK = 5;
+        CROUCH = 6;
+        ROLL = 7;
+        EMOTE = 8;
+        INTERACT = 9;
+    }
+
+    enum BlendMode {
+        OVERRIDE = 0;
+        ADDITIVE = 1;
+        LAYER = 2;
+    }
+
+    enum Easing {
+        LINEAR = 0;
+        EASE_IN = 1;
+        EASE_OUT = 2;
+        EASE_IN_OUT = 3;
+        SPRING = 4;
+        BOUNCE = 5;
+    }
+
+    enum EmotionTag {
+        NEUTRAL = 0;
+        AGGRESSIVE = 1;
+        FEARFUL = 2;
+        JOYFUL = 3;
+        EXHAUSTED = 4;
+        DETERMINED = 5;
+        SURPRISED = 6;
+    }
+
+    message Vector3 {
+        float x = 1;
+        float y = 2;
+        float z = 3;
     }
 
     ActionType action = 1;
@@ -21,13 +57,29 @@ message GestureCommand {
     int32 duration_ms = 3;
     
     // Target vector for directional actions (e.g., jump direction)
-    message Vector3 {
-        float x = 1;
-        float y = 2;
-        float z = 3;
-    }
     Vector3 direction = 4;
     
     // Absolute guarantee this packet was machine-validated
     bool compiler_verified = 5;
+
+    // Playback speed multiplier (0.1 = slow-mo, 1.0 = normal, 2.0 = fast)
+    float speed_multiplier = 6;
+
+    // Number of times to loop the action (0 = infinite, 1 = once)
+    int32 loop_count = 7;
+
+    // Animation blending mode
+    BlendMode blend_mode = 8;
+
+    // Priority in the animation queue (higher = overrides lower)
+    int32 priority = 9;
+
+    // Easing curve for the animation
+    Easing easing = 10;
+
+    // Optional: constrain action to a specific skeleton bone or bone group
+    string target_bone = 11;
+
+    // Emotional context for facial/body expression layering
+    EmotionTag emotion_tag = 12;
 }
