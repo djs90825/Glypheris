@@ -1,0 +1,24 @@
+root ::= "{" ws
+  "\"plan_id\":" ws string "," ws
+  "\"objective\":" ws json-string "," ws
+  "\"priority_level\":" ws priority "," ws
+  "\"max_retries\":" ws int "," ws
+  "\"timeout_ms\":" ws int "," ws
+  "\"requires_confirmation\":" ws bool "," ws
+  "\"parallel_allowed\":" ws bool "," ws
+  "\"nodes\":" ws nodes-list "," ws
+  "\"estimated_cost_units\":" ws float "," ws
+  "\"compiler_verified\": true" ws
+"}"
+
+priority     ::= "\"CRITICAL\"" | "\"HIGH\"" | "\"NORMAL\"" | "\"LOW\"" | "\"BACKGROUND\""
+nodes-list   ::= "[" ws "]" | "[" ws node-item ( "," ws node-item )* ws "]"
+node-item    ::= "{" ws "\"task_id\":" ws string "," ws "\"tool_name\":" ws tool-name "," ws "\"parameters_json\":" ws json-string "," ws "\"dependencies\":" ws deps-list ws "}"
+tool-name    ::= "\"http_get\"" | "\"fs_read\"" | "\"fs_write\""
+deps-list    ::= "[" ws "]" | "[" ws string ( "," ws string )* ws "]"
+string       ::= "\"" [a-zA-Z0-9_\-]* "\""
+json-string  ::= "\"" ( [^"\\] | "\\" ["\\/bfnrt] | "\\u" [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] )* "\""
+bool         ::= "true" | "false"
+float        ::= [0-9] [0-9]? [0-9]? "." [0-9] [0-9]?
+int          ::= [0-9] [0-9]? [0-9]? [0-9]? [0-9]?
+ws           ::= [ \t\n]*

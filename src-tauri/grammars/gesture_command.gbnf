@@ -1,10 +1,25 @@
-root ::= "{" ws "\"action\":" ws action-type "," ws "\"intensity\":" ws float "," ws "\"duration_ms\":" ws int "," ws "\"direction\":" ws vector3 "," ws "\"compiler_verified\": true" ws "}"
+root ::= "{" ws
+  "\"action\":" ws action-type "," ws
+  "\"intensity\":" ws float "," ws
+  "\"duration_ms\":" ws int "," ws
+  "\"direction\":" ws vector3 "," ws
+  "\"compiler_verified\": true," ws
+  "\"speed_multiplier\":" ws float "," ws
+  "\"loop_count\":" ws int "," ws
+  "\"blend_mode\":" ws blend-mode "," ws
+  "\"priority\":" ws int "," ws
+  "\"easing\":" ws easing "," ws
+  "\"target_bone\":" ws json-string "," ws
+  "\"emotion_tag\":" ws emotion-tag ws
+"}"
 
-action-type ::= "\"IDLE\"" | "\"JUMP\"" | "\"WAVE\"" | "\"RUN\"" | "\"ATTACK\""
-vector3 ::= "{" ws "\"x\":" ws float "," ws "\"y\":" ws float "," ws "\"z\":" ws float ws "}"
+action-type  ::= "\"IDLE\"" | "\"JUMP\"" | "\"WAVE\"" | "\"RUN\"" | "\"ATTACK\"" | "\"WALK\"" | "\"CROUCH\"" | "\"ROLL\"" | "\"EMOTE\"" | "\"INTERACT\""
+blend-mode   ::= "\"OVERRIDE\"" | "\"ADDITIVE\"" | "\"LAYER\""
+easing       ::= "\"LINEAR\"" | "\"EASE_IN\"" | "\"EASE_OUT\"" | "\"EASE_IN_OUT\"" | "\"SPRING\"" | "\"BOUNCE\""
+emotion-tag  ::= "\"NEUTRAL\"" | "\"AGGRESSIVE\"" | "\"FEARFUL\"" | "\"JOYFUL\"" | "\"EXHAUSTED\"" | "\"DETERMINED\"" | "\"SURPRISED\""
 
-# Expanded bounds: Allows up to 4 digits before the decimal (e.g., 1500.5) to support vectors.
-float ::= "-"? [0-9] [0-9]? [0-9]? [0-9]? "." [0-9] [0-9]? [0-9]?
-int ::= "-"? [0-9] [0-9]? [0-9]? [0-9]? [0-9]?
-
-ws ::= [ \t\n]*
+vector3      ::= "{" ws "\"x\":" ws float "," ws "\"y\":" ws float "," ws "\"z\":" ws float ws "}"
+json-string  ::= "\"" ( [^"\\] | "\\" ["\\/bfnrt] | "\\u" [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] )* "\""
+float        ::= "-"? [0-9] [0-9]? [0-9]? [0-9]? "." [0-9] [0-9]?
+int          ::= "-"? [0-9] [0-9]? [0-9]? [0-9]? [0-9]?
+ws           ::= [ \t\n]*

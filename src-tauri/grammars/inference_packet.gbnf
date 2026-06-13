@@ -1,0 +1,22 @@
+root ::= "{" ws
+  "\"session_id\":" ws string "," ws
+  "\"query_type\":" ws query-type "," ws
+  "\"confidence_threshold\":" ws float "," ws
+  "\"chain_of_thought\":" ws thoughts-list "," ws
+  "\"final_answer\":" ws json-string "," ws
+  "\"overall_confidence\":" ws float "," ws
+  "\"requires_clarification\":" ws bool "," ws
+  "\"context_window_used\":" ws int "," ws
+  "\"compiler_verified\": true" ws
+"}"
+
+query-type    ::= "\"CONVERSATIONAL\"" | "\"FACTUAL\"" | "\"ANALYTICAL\"" | "\"CREATIVE\"" | "\"INSTRUCTIONAL\""
+thoughts-list ::= "[" ws "]" | "[" ws thought-item ( "," ws thought-item )* ws "]"
+thought-item  ::= "{" ws "\"step_id\":" ws string "," ws "\"reasoning\":" ws json-string "," ws "\"confidence\":" ws float "," ws "\"evidence_refs\":" ws evidence-list ws "}"
+evidence-list ::= "[" ws "]" | "[" ws string ( "," ws string )* ws "]"
+string        ::= "\"" [a-zA-Z0-9_\-]* "\""
+json-string   ::= "\"" ( [^"\\] | "\\" ["\\/bfnrt] | "\\u" [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] [0-9a-fA-F] )* "\""
+bool          ::= "true" | "false"
+float         ::= [0-9] "." [0-9] [0-9]?
+int           ::= [0-9] [0-9]? [0-9]? [0-9]?
+ws            ::= [ \t\n]*
