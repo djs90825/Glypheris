@@ -48,7 +48,7 @@ async fn compile(
     socket_state: tauri::State<'_, api::server::SocketState>,
 ) -> Result<CompileResponse, String> {
     println!(
-        "[Glypheris] Compile — Schema: {}, Intent: {}",
+        "[Glypheris] Asynchronous Compile Initiated — Schema: {}, Intent: {}",
         schema, intent
     );
 
@@ -75,9 +75,9 @@ async fn compile(
         _ => "grammars/gesture_command.gbnf",
     };
 
-    match compiler::engine::execute_compilation(&intent, grammar_path) {
+    // Await the newly overhauled asynchronous Tokio engine core
+    match compiler::engine::execute_compilation(&intent, grammar_path).await {
         Ok(result) => {
-            // Serialise JSON → Protobuf binary
             let binary = compiler::serializer::compile_to_binary(&result.json_payload, &schema)?;
 
             let hex_string: String = binary
@@ -88,11 +88,9 @@ async fn compile(
 
             let session_id = Uuid::new_v4().to_string();
 
-            // ── Phase 5B: Broadcast over IPC socket ──────────────────────────
             let frame = api::server::frame_packet(&schema, &binary);
             socket_state.broadcast(frame);
 
-            // ── Phase 5A: Persist to session log ─────────────────────────────
             let entry = SessionEntry {
                 id: session_id.clone(),
                 timestamp: Local::now().format("%Y-%m-%d %H:%M:%S").to_string(),
@@ -108,7 +106,6 @@ async fn compile(
             {
                 let mut log = session_log.0.lock().unwrap();
                 log.push(entry);
-                // Keep last 100 entries — snapshot len before mutable drain
                 let len = log.len();
                 if len > 100 {
                     log.drain(0..len - 100);
@@ -126,7 +123,7 @@ async fn compile(
             })
         }
         Err(e) => {
-            println!("[Glypheris] Compilation Failure: {}", e);
+            println!("[Glypheris] Compilation Failure Intercepted: {}", e);
             Err(e)
         }
     }
@@ -149,7 +146,7 @@ fn clear_session_log(session_log: tauri::State<'_, SessionLog>) {
 #[derive(Deserialize)]
 pub struct ExportRequest {
     pub session_id: String,
-    pub export_type: String, // "binary" | "json" | "hex_report"
+    pub export_type: String,
 }
 
 #[tauri::command]
@@ -163,7 +160,6 @@ fn export_packet(
         .find(|e| e.id == req.session_id)
         .ok_or("Session entry not found")?;
 
-    // Decode hex → raw bytes for binary export
     let binary: Vec<u8> = entry
         .binary_hex
         .split_whitespace()
@@ -209,8 +205,6 @@ fn get_socket_status(socket_state: tauri::State<'_, api::server::SocketState>) -
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let socket_state = api::server::SocketState::new();
-
-    // Start the IPC socket server immediately on a background task
     api::server::start(socket_state.clone());
 
     tauri::Builder::default()
