@@ -18,7 +18,7 @@ interface CompilerState {
     isAmbiguousHalt: boolean;
     entropyScore: number;
     metrics: TelemetryMetrics | null;
-    engineFault: string | null; // NEW FIELD
+    engineFault: string | null;
     
     setIntentInput: (input: string) => void;
     setActiveProfile: (profile: CompilerState['activeProfile']) => void;
@@ -36,7 +36,7 @@ export const useCompilerStore = create<CompilerState>((set, get) => ({
     isAmbiguousHalt: false,
     entropyScore: 0,
     metrics: null,
-    engineFault: null, // NEW DEFAULT
+    engineFault: null,
 
     setIntentInput: (input) => set({ intentInput: input }),
     setActiveProfile: (profile) => set({ activeProfile: profile }),
@@ -44,15 +44,14 @@ export const useCompilerStore = create<CompilerState>((set, get) => ({
     triggerCompilation: async () => {
         const intent = get().intentInput;
         
-        // Context Guard: Reject if prompt exceeds allocated tokens (assume max 512 for intent context)
+        // Context Guard: Enforce buffer limitations cleanly before invoking Rust payload
         const totalTokens = estimateTokens(intent);
         if (totalTokens > 500) {
-            set({ engineFault: `Input too long (${totalTokens} tokens). Please shorten.` });
+            set({ engineFault: `Context Buffer Exceeded (${totalTokens} tokens). Please distil input.` });
             return;
         }
 
-        set({ isCompiling: true, isAmbiguousHalt: false, engineFault: null }); // Clear previous faults
-        const start = performance.now();
+        set({ isCompiling: true, isAmbiguousHalt: false, engineFault: null });
         
         try {
             const response = await invoke<{
@@ -88,12 +87,11 @@ export const useCompilerStore = create<CompilerState>((set, get) => ({
                 }
             });
 
-            // Refresh session log so ExportPanel updates immediately
+            // Synchronize historical session graph instantly
             await useSessionStore.getState().fetchLog();
             
         } catch (error) {
-            console.error("Compilation engine failure:", error);
-            // SURFACE THE HARDWARE FAULT TO THE UI
+            console.error("Compilation engine hardware fault intercepted:", error);
             set({ isCompiling: false, engineFault: String(error) }); 
         }
     },
@@ -112,7 +110,7 @@ export const useCompilerStore = create<CompilerState>((set, get) => ({
             isAmbiguousHalt: false,
             entropyScore: 0,
             metrics: null,
-            engineFault: null // Clear fault on reset
+            engineFault: null
         });
     }
 }));
