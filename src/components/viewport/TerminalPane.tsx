@@ -24,7 +24,8 @@ function AsmDisplay({ asm }: { asm: string }) {
   if (!asm) {
     return <div className="asm-output empty">// Awaiting compilation payload...</div>;
   }
-  // Syntax-highlight the JSON payload
+  
+  // Deterministic syntax-highlighting for strict JSON visualization
   const highlighted = asm
     .replace(/("(?:[^"\\]|\\.)*")\s*:/g, '<span style="color:#4aadcc">$1</span>:')
     .replace(/:\s*("(?:[^"\\]|\\.)*")/g, ': <span style="color:#00FF94">$1</span>')
@@ -41,10 +42,12 @@ function AsmDisplay({ asm }: { asm: string }) {
 }
 
 export function TerminalPane() {
-  const {
-    compiledHex, compiledAsm,
-    activeProfile, isCompiling, metrics,
-  } = useCompilerStore();
+  // ATOMIC SELECTORS: Ensuring isolation from external intentInput key-stroke lag.
+  const compiledHex = useCompilerStore((state) => state.compiledHex);
+  const compiledAsm = useCompilerStore((state) => state.compiledAsm);
+  const activeProfile = useCompilerStore((state) => state.activeProfile);
+  const isCompiling = useCompilerStore((state) => state.isCompiling);
+  const metrics = useCompilerStore((state) => state.metrics);
 
   const accent = PROFILE_ACCENT[activeProfile];
   const byteCount = compiledHex ? compiledHex.split(' ').length : 0;
@@ -52,7 +55,7 @@ export function TerminalPane() {
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, minHeight: 0 }}>
 
-      {/* ASM / JSON Panel */}
+      {/* Structured ASM / JSON Evaluation Panel */}
       <div className="panel" style={{ flex: '1 1 60%', minHeight: 0, position: 'relative' }}>
         <div className="panel-header">
           <div className="panel-dot" style={{ background: accent.dot, boxShadow: `0 0 6px ${accent.dot}` }} />
@@ -75,7 +78,7 @@ export function TerminalPane() {
                 ENGINE ACTIVE
               </div>
               <div style={{ fontSize: 10, color: '#2a6080', letterSpacing: '0.1em' }}>
-                Awaiting deterministic output...
+                Awaiting deterministic structural output...
               </div>
             </div>
           </div>
@@ -84,7 +87,7 @@ export function TerminalPane() {
         <AsmDisplay asm={compiledAsm} />
       </div>
 
-      {/* HEX Binary Panel */}
+      {/* Hexadecimal Serialized Binary Display Panel */}
       <div className="panel" style={{ flex: '1 1 40%', minHeight: 0 }}>
         <div className="panel-header">
           <div className="panel-dot" style={{ background: 'var(--neon-cyan)', boxShadow: '0 0 6px var(--neon-cyan)' }} />
@@ -100,7 +103,7 @@ export function TerminalPane() {
         </div>
         <HexDisplay hex={compiledHex} />
 
-        {/* Metrics footer */}
+        {/* Dynamic Telemetry Footer */}
         {metrics && (
           <div className="metrics-footer">
             <div className="metric-item">
