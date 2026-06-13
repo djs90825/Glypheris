@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { invoke } from '@tauri-apps/api/core';
 import { estimateTokens } from '../utils/tokenizer';
+import { useSessionStore } from './useSessionStore';
 
 interface TelemetryMetrics {
     tps: number;
@@ -61,6 +62,7 @@ export const useCompilerStore = create<CompilerState>((set, get) => ({
                 ambiguity_score: number;
                 tps: number;
                 ttft: number;
+                session_id: string;
             }>('compile', {
                 intent: get().intentInput,
                 schema: get().activeProfile,
@@ -82,9 +84,12 @@ export const useCompilerStore = create<CompilerState>((set, get) => ({
                 metrics: {
                     tps: response.tps,
                     ttft: response.ttft,
-                    byteSize: Math.floor(response.binary_hex.length / 2)
+                    byteSize: response.binary_hex.split(' ').length,
                 }
             });
+
+            // Refresh session log so ExportPanel updates immediately
+            await useSessionStore.getState().fetchLog();
             
         } catch (error) {
             console.error("Compilation engine failure:", error);
