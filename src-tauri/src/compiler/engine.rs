@@ -54,20 +54,9 @@ compiler_verified: true"
     }
 }
 
-pub fn execute_compilation(
-    intent: &str,
-    grammar_path: &str,
-    hardware_flag: &str,
-) -> Result<EngineResult, String> {
+pub fn execute_compilation(intent: &str, grammar_path: &str) -> Result<EngineResult, String> {
     let base_dir = std::env::current_dir().unwrap_or_default();
-
-    // Proactive Intervention: Dynamic selection based on OS probe
-    let exe_name = if hardware_flag == "VULKAN" {
-        "llama-vulkan.exe"
-    } else {
-        "llama-cpu.exe"
-    };
-    let binary_path = base_dir.join("binaries").join(exe_name);
+    let binary_path = base_dir.join("binaries").join("llama-cpu.exe");
     let model_path = base_dir
         .join("binaries")
         .join("models")
@@ -86,7 +75,7 @@ pub fn execute_compilation(
         schema_context, intent
     );
 
-    let start_time = std::time::Instant::now();
+    let start_time = Instant::now();
 
     // HARDWARE OPTIMISATION: Eliminate Pipe Deadlocks & Sampler Traps
     let child_res = Command::new(&binary_path)
@@ -110,7 +99,7 @@ pub fn execute_compilation(
         ])
         .stdin(Stdio::null()) // CRITICAL: Prevents process from hanging on stdin EOF
         .stdout(Stdio::piped())
-        .stderr(Stdio::piped()) // CRITICAL: Stop piping to null. We need metrics.
+        .stderr(Stdio::null()) // CRITICAL: Bypasses Windows OS pipe buffer deadlocks entirely
         .creation_flags(0x08000000)
         .spawn();
 
